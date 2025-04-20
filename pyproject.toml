@@ -1,0 +1,10 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.commitizen]
+name = "cz_conventional_commits"
+version = "0.1.0"          # opcional: versión inicial
+tag_format = "v$version"   # el formato de tus tags, p.ej. v0.2.0
+
+# (puedes dejar commitizen que añada changelog, etc. con más opciones)
