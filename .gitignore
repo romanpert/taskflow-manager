@@ -8,3 +8,11 @@ venv/
 dist/
 build/
 *.egg-info/
+node_modules
+.eggs
+.github
+.pre-commit-config.yaml
+CHANGELOG.md 
+MANIFEST.in
+package.json
+package-lock.json

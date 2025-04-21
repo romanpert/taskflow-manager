@@ -1,11 +1,11 @@
 # =============================================================
 # file: persistence.py
 # =============================================================
-from pathlib import Path
 import json
+from pathlib import Path
 from typing import Dict
 
-from models import Project
+from .models import Project
 
 DATA_PATH = Path("/data/projects.json")
 
