@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>TaskFlow</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body, html { height: 100%; font-family: sans-serif; }
+    .container { display: flex; height: 100%; }
+    .sidebar {
+      width: 240px;
+      background: #1e1e1e;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 20px;
+    }
+    .sidebar img { width: 120px; margin-bottom: 40px; }
+    .nav { flex: 1; width: 100%; }
+    .nav button {
+      width: 100%;
+      background: none;
+      border: none;
+      color: #fff;
+      padding: 15px 20px;
+      text-align: left;
+      cursor: pointer;
+    }
+    .nav button:hover { background: #333; }
+    .content { flex: 1; padding: 40px; }
+    .btn-create {
+      position: fixed;
+      bottom: 40px; right: 40px;
+      width: 60px; height: 60px;
+      border-radius: 30px;
+      background: #007bff;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+    .btn-create:before {
+      content: "+";
+      display: block;
+      font-size: 32px;
+      color: #fff;
+      line-height: 60px;
+      text-align: center;
+    }
+    /* lateral menu */
+    .menu-select {
+      position: fixed;
+      bottom: 110px; right: 40px;
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      display: none;
+      flex-direction: column;
+    }
+    .menu-select button {
+      background: none; border: none; padding: 10px 20px; cursor: pointer;
+    }
+    .menu-select button:hover { background: #f0f0f0; }
+    /* modal */
+    .modal {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5);
+      display: none;
+      align-items: center; justify-content: center;
+    }
+    .modal .form {
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      width: 400px;
+      max-height: 90%;
+      overflow-y: auto;
+    }
+    .form label { display: block; margin-top: 10px; font-weight: bold; }
+    .form input, .form textarea, .form select {
+      width: 100%; padding: 8px; margin-top: 4px; border: 1px solid #ccc; border-radius: 4px;
+    }
+    .form .actions {
+      margin-top: 20px;
+      text-align: right;
+    }
+    .form .actions button {
+      padding: 8px 16px; margin-left: 8px; border: none; border-radius: 4px;
+      cursor: pointer;
+    }
+    .form .actions .submit { background: #007bff; color: #fff; }
+    .form .actions .cancel { background: #ccc; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <aside class="sidebar">
+      <img src="assets/taskflow-logo-v0-removebg-preview.png" alt="TaskFlow Logo">
+      <nav class="nav">
+        <button onclick="window.location='#'">Dashboard</button>
+        <button onclick="window.location='#projects'">Proyectos</button>
+        <button onclick="window.location='#tasks'">Tareas</button>
+        <button onclick="window.location='#settings'">Ajustes</button>
+      </nav>
+    </aside>
+    <main class="content">
+      <h1>Bienvenido a TaskFlow</h1>
+      <p>Selecciona una opción del menú.</p>
+    </main>
+  </div>
+
+  <button class="btn-create" id="btn-create"></button>
+  <div class="menu-select" id="menu-select">
+    <button data-type="project">Crear Proyecto</button>
+    <button data-type="task">Crear Tarea</button>
+    <button data-type="subtask">Crear Subtarea</button>
+  </div>
+
+  <div class="modal" id="modal">
+    <div class="form" id="form-container">
+      <!-- aquí inyectamos el formulario -->
+    </div>
+  </div>
+
+  <script>
+    const btn = document.getElementById('btn-create');
+    const menu = document.getElementById('menu-select');
+    const modal = document.getElementById('modal');
+    const formContainer = document.getElementById('form-container');
+    let currentType = null;
+
+    btn.addEventListener('click', () => {
+      menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
+    });
+
+    menu.querySelectorAll('button').forEach(b => {
+      b.addEventListener('click', () => {
+        currentType = b.dataset.type;
+        menu.style.display = 'none';
+        openForm(currentType);
+      });
+    });
+
+    function openForm(type) {
+      let html = '';
+      if (type === 'project') {
+        html = `
+          <h2>Crear Proyecto</h2>
+          <label>Nombre</label><input type="text" id="nombre" required>
+          <label>Descripción</label><textarea id="descripcion"></textarea>
+          <label>Estado</label>
+          <select id="estado">
+            <option value="activo">activo</option>
+            <option value="pendiente">pendiente</option>
+            <option value="completado">completado</option>
+          </select>
+          <label>Fecha inicio</label><input type="datetime-local" id="fecha_inicio">
+          <label>Fecha fin</label><input type="datetime-local" id="fecha_fin">
+          <label>Responsables (coma sepr.)</label><input type="text" id="responsables">
+          <label>Etiquetas (coma sepr.)</label><input type="text" id="etiquetas">
+        `;
+      } else if (type === 'task') {
+        html = `
+          <h2>Crear Tarea</h2>
+          <label>Proyecto ID</label><input type="text" id="project_id" required>
+          <label>Título</label><input type="text" id="titulo" required>
+          <label>Descripción</label><textarea id="descripcion"></textarea>
+          <label>Estado</label>
+          <select id="estado">
+            <option value="pending">pending</option>
+            <option value="in-progress">in-progress</option>
+            <option value="completed">completed</option>
+          </select>
+          <label>Fecha inicio</label><input type="datetime-local" id="fecha_inicio">
+          <label>Fecha fin</label><input type="datetime-local" id="fecha_fin">
+          <label>Asignados (coma sepr.)</label><input type="text" id="asignados">
+          <label>Prioridad</label><input type="text" id="prioridad">
+          <label>Dependencias (coma sepr.)</label><input type="text" id="dependencias">
+          <label>Etiquetas (coma sepr.)</label><input type="text" id="etiquetas">
+        `;
+      } else if (type === 'subtask') {
+        html = `
+          <h2>Crear Subtarea</h2>
+          <label>Proyecto ID</label><input type="text" id="project_id" required>
+          <label>Tarea ID</label><input type="text" id="task_id" required>
+          <label>Título</label><input type="text" id="titulo" required>
+          <label>Estado</label>
+          <select id="estado">
+            <option value="pending">pending</option>
+            <option value="completed">completed</option>
+          </select>
+        `;
+      }
+      html += `
+        <div class="actions">
+          <button class="cancel" onclick="closeForm()">Cancelar</button>
+          <button class="submit" onclick="submitForm()">Enviar</button>
+        </div>
+      `;
+      formContainer.innerHTML = html;
+      modal.style.display = 'flex';
+    }
+
+    function closeForm() {
+      modal.style.display = 'none';
+      formContainer.innerHTML = '';
+    }
+
+    async function submitForm() {
+      let url, body;
+      if (currentType === 'project') {
+        const responsables = document.getElementById('responsables').value.split(',').map(s=>s.trim());
+        const etiquetas    = document.getElementById('etiquetas').value.split(',').map(s=>s.trim());
+        body = {
+          nombre: document.getElementById('nombre').value,
+          descripcion: document.getElementById('descripcion').value,
+          estado: document.getElementById('estado').value,
+          fecha_inicio: new Date(document.getElementById('fecha_inicio').value).toISOString(),
+          fecha_fin:    new Date(document.getElementById('fecha_fin').value).toISOString(),
+          responsables, etiquetas
+        };
+        url = '/projects';
+      } else if (currentType === 'task') {
+        const asignados    = document.getElementById('asignados').value.split(',').map(s=>s.trim());
+        const dependencias = document.getElementById('dependencias').value.split(',').map(s=>s.trim());
+        const etiquetas    = document.getElementById('etiquetas').value.split(',').map(s=>s.trim());
+        const project_id   = document.getElementById('project_id').value;
+        body = {
+          titulo: document.getElementById('titulo').value,
+          descripcion: document.getElementById('descripcion').value,
+          estado: document.getElementById('estado').value,
+          fecha_inicio: new Date(document.getElementById('fecha_inicio').value).toISOString(),
+          fecha_fin:    new Date(document.getElementById('fecha_fin').value).toISOString(),
+          asignados, prioridad: document.getElementById('prioridad').value,
+          dependencias, etiquetas
+        };
+        url = `/projects/${project_id}/tasks`;
+      } else {
+        const project_id = document.getElementById('project_id').value;
+        const task_id    = document.getElementById('task_id').value;
+        body = {
+          titulo: document.getElementById('titulo').value,
+          estado: document.getElementById('estado').value
+        };
+        url = `/projects/${project_id}/tasks/${task_id}/subtasks`;
+      }
+
+      try {
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+        if (!res.ok) throw new Error(await res.text());
+        closeForm();
+        alert('Creado con éxito');
+      } catch (err) {
+        alert('Error: ' + err.message);
+      }
+    }
+  </script>
+</body>
+</html>

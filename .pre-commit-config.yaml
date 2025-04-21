@@ -22,3 +22,13 @@ repos:
     hooks:
       - id: flake8
         additional_dependencies: [flake8-bugbear]
+
+
+  -   repo: local
+      hooks:
+        - id: check-name-type-conflicts
+          name: Check for name-type conflicts
+          entry: python taskflow_manager/test/check_field_conflicts.py
+          language: system
+          types: [python]
+
