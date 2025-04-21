@@ -1,4 +1,6 @@
 include data/projects.json
 recursive-include frontend *.html *.png *.css *.js
+
 include package.json
 include package-lock.json
+
