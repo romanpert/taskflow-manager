@@ -1,20 +1,23 @@
-# .gitignore
+# Python
 __pycache__/
 *.py[cod]
+
+# Entornos virtuales
 env/
 venv/
+
+# Cachés, builds, artefactos
 .pytest_cache/
 .mypy_cache/
-dist/
 build/
+dist/
 *.egg-info/
+.eggs/
 
-node_modules
-.eggs
-.github
-.pre-commit-config.yaml
-CHANGELOG.md 
-MANIFEST.in
-package.json
-package-lock.json
+# Node
+node_modules/
 
+# Ignora únicamente la carpeta de módulos, NO los package.json
+# node_modules
+
+# Aquí acabamos con las exclusiones de ficheros de proyecto
